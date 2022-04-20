@@ -109,6 +109,7 @@ async fn watch_log_groups(
     let green = Style::new().green();
     let blue = Style::new().blue();
     let magenta = Style::new().magenta();
+    let yellow = Style::new().yellow();
 
     loop {
         let start_time =
@@ -116,14 +117,6 @@ async fn watch_log_groups(
         let queries = FuturesUnordered::new();
         for group in &group_names {
             queries.push(get_group_events(client, &group, start_time));
-            // queries.push(
-            //     client
-            //         .filter_log_events()
-            //         .log_group_name(group)
-            //         .limit(100)
-            //         .start_time(start_time)
-            //         .send(),
-            // );
         }
 
         let results = queries.collect::<Vec<_>>().await;
@@ -144,6 +137,8 @@ async fn watch_log_groups(
                 blue.apply_to(event.message)
             } else if event.message.contains("ERROR") {
                 red.apply_to(event.message)
+            } else if event.message.contains("WARN") {
+                yellow.apply_to(event.message)
             } else {
                 def.apply_to(event.message)
             };
